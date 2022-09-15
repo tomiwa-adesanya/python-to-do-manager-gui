@@ -18,12 +18,9 @@ REQUIRED WIDGETS:
         > To display information
 """
 
+from todo.task import *
+from threading import Thread
 
-
-from tkinter import ttk
-from os import remove, path
-from todo.task import Tasks
-import tkinter as tk
 
 class ToDoManager(tk.Tk):
     def __init__(self):
@@ -37,6 +34,7 @@ class ToDoManager(tk.Tk):
         maxsize = (800, 750) # Width, Height
         minsize = (700, 650) # Width, Height
 
+        self.title("To-Do")
         self.geometry(geometry)
         self.maxsize(*maxsize)
         self.minsize(*minsize)
@@ -53,8 +51,33 @@ class ToDoManager(tk.Tk):
         self.__event_binding()
         self.mainloop()
     
+    def __get_task(self):
+
+        new_task_manager = NewTaskManager(self)
+        new_task_manager.window.grab_set() # Prevents any further action within main window
+
+        while new_task_manager.task_value == None:
+            # Updates window if user is yet to input value
+            self.update()
+
+        new_task = new_task_manager.task_value
+
+        new_task_manager.window.destroy()
+
+        if new_task:
+            return new_task
+        else: 
+            return None
+
     def __add_task(self):
-        pass
+        new_task = self.__get_task()
+        if (new_task):
+
+            number_of_tasks = len(self.ongoing_task_items)
+            self.ongoing_task_items.append(f"{number_of_tasks+1}. {new_task}")
+            self.ongoing_task_var.set(
+                self.ongoing_task_items
+            )
 
     def __delete_task(self):
         pass
@@ -93,7 +116,7 @@ class ToDoManager(tk.Tk):
         tasks_label.grid(
             column=0, row=0, **label_grid_options
         )
-        tasks_listbox = Listbox(self, listvariable=self.ongoing_task_var)
+        tasks_listbox = Listbox(self, listvariable=self.ongoing_task_var, font=("Helvetica", 12))
         tasks_listbox.grid(
             column=0, sticky="w", ipadx=255, ipady=85, padx=1.5, columnspan=4, 
         )
@@ -120,17 +143,17 @@ class ToDoManager(tk.Tk):
             column=0, row=0, **button_grid_options
         )
 
-        edit_button = Button(button_frame, text="edit task")
+        edit_button = Button(button_frame, text="edit task", command=lambda: print("Edit button pressed"))
         edit_button.grid(
             column=0, row=1, **button_grid_options
         )
 
-        remove_button = Button(button_frame, text="remove task")
+        remove_button = Button(button_frame, text="remove task", command=lambda: print("Remove button pressed"))
         remove_button.grid(
             column=0, row=2, **button_grid_options
         )
 
-        check_button = Button(button_frame, text="completed")
+        check_button = Button(button_frame, text="completed", command=lambda: print("Check button pressed"))
         check_button.grid(
             column=0, row=3, **button_grid_options
         )
@@ -147,10 +170,4 @@ class ToDoManager(tk.Tk):
             "<Control-W>", lambda event=None: self.destroy()
         )
         
-        
-
-        
-        
-        
-
 ToDoManager()
