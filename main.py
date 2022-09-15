@@ -19,11 +19,12 @@ REQUIRED WIDGETS:
 """
 
 from todo.task import *
-from threading import Thread
-
 
 class ToDoManager(tk.Tk):
     def __init__(self):
+        """
+        Builds a To-Do Manager widget
+        """
         super().__init__() # Calling Parent class constructor
 
         #-------------------------------------------------------------------------------
@@ -48,19 +49,22 @@ class ToDoManager(tk.Tk):
         
         #------------------------------------------------------------------------------
         self.__build_components()
-        self.__event_binding()
+        self.__bind_events()
         self.mainloop()
     
-    def __get_task(self):
+    def __task_input_dialog(self):
+        """
+        Creates a tool Toplevel window to prompt user to type new task into the provided entry widget
+        """
 
         new_task_manager = NewTaskManager(self)
         new_task_manager.window.grab_set() # Prevents any further action within main window
 
         while new_task_manager.task_value == None:
-            # Updates window if user is yet to input value
-            self.update()
+            # Updates window if user is yet to input value. Breaks if tool window is destroyed or if user enters a value
+            self.update() # Ensures root window doesn't start hanging
 
-        new_task = new_task_manager.task_value
+        new_task = new_task_manager.task_value #  Task input from the task Dialog is no longer empty, it is either 
 
         new_task_manager.window.destroy()
 
@@ -70,21 +74,35 @@ class ToDoManager(tk.Tk):
             return None
 
     def __add_task(self):
-        new_task = self.__get_task()
-        if (new_task):
+        """
+        Adds new task to Tasks Listbox
+        """
+        new_task_input = self.__task_input_dialog()
+        if (new_task_input):
 
             number_of_tasks = len(self.ongoing_task_items)
-            self.ongoing_task_items.append(f"{number_of_tasks+1}. {new_task}")
+            self.ongoing_task_items.append(f"{number_of_tasks+1}. {new_task_input}")
             self.ongoing_task_var.set(
                 self.ongoing_task_items
             )
 
     def __delete_task(self):
-        pass
+        """
+        Deletes task selected from the Listbox
+        """
+        print(
+            
+        )
     def __edit_task(self):
+        """
+        Prompts user to edit selected task
+        """
         pass
 
     def __build_components(self):
+        """
+        Builds GUI required components and places them into root window
+        """
 
         Button = ttk.Button
         Frame = ttk.Frame
@@ -101,7 +119,7 @@ class ToDoManager(tk.Tk):
             "ipadx" : 5, "ipady" : 5, "padx" : 1.5, "pady" : 1.5, "sticky" : "w"
         } 
         button_grid_options = {
-            "ipadx" : 17.5, "ipady" : 15, "padx" : 1.5, "sticky" : "ne"
+            "ipadx" : 15, "ipady" : 15, "padx" : 1.5, "sticky" : "ne", 
         }
 
         self.ongoing_task_items = []
@@ -116,9 +134,9 @@ class ToDoManager(tk.Tk):
         tasks_label.grid(
             column=0, row=0, **label_grid_options
         )
-        tasks_listbox = Listbox(self, listvariable=self.ongoing_task_var, font=("Helvetica", 12))
-        tasks_listbox.grid(
-            column=0, sticky="w", ipadx=255, ipady=85, padx=1.5, columnspan=4, 
+        self.tasks_listbox = Listbox(self, listvariable=self.ongoing_task_var, font=("Helvetica", 12))
+        self.tasks_listbox.grid(
+            column=0, row=1, sticky="w", ipadx=255, ipady=85, padx=1.5, columnspan=4, 
         )
 
         completed_task_label = Label(self, text="COMPLETED")
@@ -127,7 +145,7 @@ class ToDoManager(tk.Tk):
         )
         completed_task_listbox = Listbox(self, listvariable=self.completed_task_var)
         completed_task_listbox.grid(
-            column=0, row=3, sticky="w", ipadx=255, ipady=50, padx=1.5, columnspan=4,
+            column=0, row=3, sticky="w", ipadx=265, ipady=50, padx=1.5, columnspan=4,
         )
 
         #---------------------------------------------------------------------------------
@@ -135,7 +153,7 @@ class ToDoManager(tk.Tk):
         #---------------------------------------------------------------------------------
         button_frame = Frame(self, cursor="dot", width=100, height=200)
         button_frame.grid(
-            column=4, row=1, sticky="nw", padx=1.5, pady=1.5
+            column=4, row=1, sticky="nw",
         )
 
         add_button = Button(button_frame, text="add task", command=self.__add_task)
@@ -158,8 +176,7 @@ class ToDoManager(tk.Tk):
             column=0, row=3, **button_grid_options
         )
 
-    def __event_binding(self):
-
+    def __bind_events(self):
         #--------------------------------------------------------------------------------
         #                               ROOT WINDOW
         # -------------------------------------------------------------------------------
@@ -168,6 +185,12 @@ class ToDoManager(tk.Tk):
         )
         self.bind(
             "<Control-W>", lambda event=None: self.destroy()
+        )
+        self.bind(
+            "<Control-n>", lambda event=None: self.__add_task()
+        )
+        self.bind(
+            "<Control-n>", lambda event=None: self.__add_task()
         )
         
 ToDoManager()

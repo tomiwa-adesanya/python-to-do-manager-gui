@@ -1,5 +1,4 @@
 from tkinter import ttk
-from os import remove, path
 import tkinter as tk
 
 class NewTaskManager():
@@ -16,14 +15,16 @@ class NewTaskManager():
         self.window.attributes("-toolwindow", True)
         self.window.attributes("-alpha", 0.95)
 
-        self.window.bind(
-            "<Destroy>",lambda event=None: self._window_destroyed()
-        ) # 
+        
 
         #-----------------------------------------------------------------
         self.__build_components()
+        self.__bind_events()
 
     def __build_components(self):
+        """
+        Builds and places required widgets within Toplevel tool window
+        """
         Button = ttk.Button 
         Entry = ttk.Entry
         Label = ttk.Label
@@ -43,17 +44,39 @@ class NewTaskManager():
         new_task.grid(
             column=1, row=0, ipadx=75, ipady=5, pady=5
         )
+        new_task.focus()
 
         #-------------------------------------------------------------------
         #                           BUTTON
         #-------------------------------------------------------------------
-        add_button = Button(self.window, text="add", command=self.__update_task)
+        add_button = Button(self.window, text="add", command=self.__update_task_value)
         add_button.grid(
             column=1, row=1, sticky="e", ipadx=10, ipady=5
         )
+
+    def __bind_events(self):
+
+        self.window.bind(
+            "<Destroy>",lambda event=None: self.__window_destroyed()
+        ) # 
+        self.window.bind(
+            "<Return>", lambda event=None: self.__update_task_value()
+        )
+        self.window.bind(
+            "<Control-w>",lambda event=None: self.window.destroy()
+        ) # 
+        self.window.bind(
+            "<Control-W>",lambda event=None: self.window.destroy()
+        ) # 
     
-    def __update_task(self):
+    def __update_task_value(self):
+        """
+        Updates the value of the task_value attribute that stores the raw string input from entry. Invoked by the add button
+        """
         self.task_value = self.new_task_var.get()
         
-    def _window_destroyed(self):
+    def __window_destroyed(self):
+        """
+        Updates the value of the task_value attribute to an empty string if window is closed before clicking add button
+        """
         self.task_value = ""
