@@ -20,6 +20,8 @@ REQUIRED WIDGETS:
 
 from todo.task import *
 
+icon_path = "data\\img\\icon.ico"
+
 class ToDoManager(tk.Tk):
     def __init__(self):
         """
@@ -36,6 +38,7 @@ class ToDoManager(tk.Tk):
         minsize = (700, 650) # Width, Height
 
         self.title("To-Do")
+        self.iconbitmap(icon_path)
         self.geometry(geometry)
         self.maxsize(*maxsize)
         self.minsize(*minsize)
