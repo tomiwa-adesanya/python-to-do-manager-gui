@@ -19,8 +19,12 @@ REQUIRED WIDGETS:
 """
 
 from todo.task import *
+from playsound import playsound
 
 icon_path = "data\\img\\icon.ico"
+tone_path = "data\\audio\\tone.mp3"
+
+beep_tone = lambda : playsound(tone_path)
 
 class ToDoManager(tk.Tk):
     def __init__(self):
@@ -55,13 +59,17 @@ class ToDoManager(tk.Tk):
         self.__bind_events()
         self.mainloop()
     
-    def __task_input_dialog(self):
+    def __task_input_dialog(self, edit_function: bool=False, task_value: str=""):
         """
         Creates a tool Toplevel window to prompt user to type new task into the provided entry widget
         """
 
-        new_task_manager = NewTaskManager(self)
-        new_task_manager.window.grab_set() # Prevents any further action within main window
+        if (not edit_function):
+            new_task_manager = NewTaskManager(self)
+            new_task_manager.window.grab_set() # Prevents any further action within main window
+        else: 
+            new_task_manager = EditTaskManager(self, task_value)
+            new_task_manager.window.grab_set()
 
         while new_task_manager.task_value == None:
             # Updates window if user is yet to input value. Breaks if tool window is destroyed or if user enters a value
@@ -76,31 +84,69 @@ class ToDoManager(tk.Tk):
         else: 
             return None
 
-    def __add_task(self):
+    def __add_task(self, completed: bool=False):
         """
-        Adds new task to Tasks Listbox
+        Adds tasks to either Ongoing tasks or completed tasks
         """
-        new_task_input = self.__task_input_dialog()
-        if (new_task_input):
-
-            number_of_tasks = len(self.ongoing_task_items)
-            self.ongoing_task_items.append(f"{number_of_tasks+1}. {new_task_input}")
-            self.ongoing_task_var.set(
-                self.ongoing_task_items
+        if (not completed):
+            new_task_input = self.__task_input_dialog()
+            if (new_task_input):
+                number_of_tasks = len(self.ongoing_task_items)
+                self.ongoing_task_items.append(f"{number_of_tasks+1}. {new_task_input}")
+                self.ongoing_task_var.set(
+                    self.ongoing_task_items
+                )
+        else:
+            number_of_completed_tasks = len(self.completed_task_items)
+            _completed_task = self.__delete_task()
+            completed_task = " ".join(
+                _completed_task.split()[1:]
             )
+            self.completed_task_items.append(
+                f"{number_of_completed_tasks+1}. {completed_task}"
+            )
+            self.completed_task_var.set(
+                self.completed_task_items
+            )
+            self.update()
+            beep_tone()
+
 
     def __delete_task(self):
         """
         Deletes task selected from the Listbox
         """
-        print(
-            
+        selected_task_index = self.tasks_listbox.curselection()[0]
+        ongoing_tasks = self.ongoing_task_items.copy()
+        removed_item = ongoing_tasks.pop(selected_task_index)
+        ongoing_tasks = [
+           " ".join(task.split()[1:]) for task in ongoing_tasks
+        ]
+        new_ongoing_task = [ ]
+        for task_id, task in enumerate(ongoing_tasks): 
+            new_ongoing_task.append(
+                f"{task_id+1}. {task}"
+            )
+        self.ongoing_task_items = new_ongoing_task 
+        self.ongoing_task_var.set(
+            self.ongoing_task_items
         )
+        return removed_item
+
     def __edit_task(self):
         """
         Prompts user to edit selected task
         """
-        pass
+
+        selected_task = self.tasks_listbox.curselection()[0]
+        value = self.ongoing_task_items[selected_task].split()[1:]
+
+        new_task_input = self.__task_input_dialog(True, value)
+        if (new_task_input):
+            self.ongoing_task_items[selected_task] = f"{selected_task+1}. {new_task_input}"
+            self.ongoing_task_var.set(
+                self.ongoing_task_items
+            )
 
     def __build_components(self):
         """
@@ -146,7 +192,7 @@ class ToDoManager(tk.Tk):
         completed_task_label.grid(
             column=0, row=2, **label_grid_options
         )
-        completed_task_listbox = Listbox(self, listvariable=self.completed_task_var)
+        completed_task_listbox = Listbox(self, listvariable=self.completed_task_var, font=("Helvetica", 12))
         completed_task_listbox.grid(
             column=0, row=3, sticky="w", ipadx=265, ipady=50, padx=1.5, columnspan=4,
         )
@@ -164,17 +210,17 @@ class ToDoManager(tk.Tk):
             column=0, row=0, **button_grid_options
         )
 
-        edit_button = Button(button_frame, text="edit task", command=lambda: print("Edit button pressed"))
+        edit_button = Button(button_frame, text="edit task", command=lambda: self.__edit_task())
         edit_button.grid(
             column=0, row=1, **button_grid_options
         )
 
-        remove_button = Button(button_frame, text="remove task", command=lambda: print("Remove button pressed"))
+        remove_button = Button(button_frame, text="remove task", command=lambda: self.__delete_task())
         remove_button.grid(
             column=0, row=2, **button_grid_options
         )
 
-        check_button = Button(button_frame, text="completed", command=lambda: print("Check button pressed"))
+        check_button = Button(button_frame, text="completed", command=lambda: self.__add_task(True))
         check_button.grid(
             column=0, row=3, **button_grid_options
         )
@@ -193,7 +239,7 @@ class ToDoManager(tk.Tk):
             "<Control-n>", lambda event=None: self.__add_task()
         )
         self.bind(
-            "<Control-n>", lambda event=None: self.__add_task()
+            "<Control-N>", lambda event=None: self.__add_task()
         )
         
 ToDoManager()
