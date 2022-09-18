@@ -22,7 +22,7 @@ Clone this repository unto your local device or download the zip of this reposit
 Run [main.py](/main.py) and this should automatically create the GUI window. 
 
 For non-programmers, I have compiled the source code into an exe and zipped it with all necessary files required for the GUI to run without python installed on your computer.
-Download the zip file from [here](/dist/to-do.zip) and unzip it. Double click on main.exe within the unzipped folder to run program. 
+Download the zip file from [here](https://github.com/tomiwa-adesanya/python-to-do-manager-gui/raw/master/dist/to-do.zip) and unzip it. Double click on main.exe within the unzipped folder to run program. 
 
 GUI Shortcuts:
   * `Ctrl+W` to close GUI window.
