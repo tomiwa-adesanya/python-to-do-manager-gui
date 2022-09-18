@@ -1,7 +1,15 @@
+""" 
+    ABOUT: Python Module with classes utilized by the main "To Do" GUI
+    AUTHOR: Tomiwa G. Adesanya<t.g.adesanya392@gmail.com>
+"""
+
 from tkinter import ttk
 import tkinter as tk
 
 class NewTaskManager():
+    """
+    Builds tool window within root window with necessary widgets to enable users to input new task(s)
+    """
 
     def __init__(self, master):
         self.window = tk.Toplevel(master)
@@ -80,6 +88,9 @@ class NewTaskManager():
         self.task_value = ""
 
 class EditTaskManager():
+    """
+    Builds a tool window GUI attached to the root GUI window, for the purpose of providing users widgets for editing a selected task
+    """
 
     def __init__(self, master, value: str=""):
         self.window = tk.Toplevel(master)
@@ -139,16 +150,16 @@ class EditTaskManager():
 
         self.window.bind(
             "<Destroy>",lambda event=None: self.__window_destroyed()
-        ) # 
+        ) 
         self.window.bind(
             "<Return>", lambda event=None: self.__update_task_value()
         )
         self.window.bind(
             "<Control-w>",lambda event=None: self.window.destroy()
-        ) # 
+        ) 
         self.window.bind(
             "<Control-W>",lambda event=None: self.window.destroy()
-        ) # 
+        ) 
     
     def __update_task_value(self):
         """

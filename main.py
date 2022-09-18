@@ -1,6 +1,6 @@
 """ PYTHON GUI PROJECT
     ABOUT: A task/to-do list manager GUI that enables users to add, remove, edit and check completed tasks
-    AUTHOR: Tomiwa G. Adesanya<t.g.adesanya@gmail.com
+    AUTHOR: Tomiwa G. Adesanya<t.g.adesanya392@gmail.com>
 """
 
 from playsound import playsound
