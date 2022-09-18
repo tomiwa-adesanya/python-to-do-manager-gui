@@ -64,16 +64,16 @@ class NewTaskManager():
 
         self.window.bind(
             "<Destroy>",lambda event=None: self.__window_destroyed()
-        ) # 
+        ) 
         self.window.bind(
             "<Return>", lambda event=None: self.__update_task_value()
         )
         self.window.bind(
             "<Control-w>",lambda event=None: self.window.destroy()
-        ) # 
+        )  
         self.window.bind(
             "<Control-W>",lambda event=None: self.window.destroy()
-        ) # 
+        )  
     
     def __update_task_value(self):
         """
