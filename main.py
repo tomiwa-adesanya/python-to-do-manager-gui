@@ -3,9 +3,14 @@
     AUTHOR: Tomiwa G. Adesanya<t.g.adesanya392@gmail.com>
 """
 
-from playsound import playsound
 from threading import Thread
+from tkinter.messagebox import showerror
 from todo.task import *
+
+try:
+    from playsound import playsound
+except(ModuleNotFoundError):
+    playsound = lambda void_arg: ""
 
 
 icon_path = "data\\img\\icon.ico"
@@ -41,12 +46,23 @@ class ToDoManagerGUI(tk.Tk):
         self.columnconfigure(index=2, weight=1)
         self.columnconfigure(index=3, weight=1)
         self.columnconfigure(index=4, weight=1)
+
+        self.index_error_response = lambda action: showerror("select task", message=f"Please select task to {action}")
         
         #------------------------------------------------------------------------------
         self.__build_components()
         self.__bind_events()
         self.mainloop()
     
+    def __clear_completed_task(self) -> None: 
+        """
+        Clears all completed tasks from the completed tasks Listbox
+        """
+        self.completed_task_items = []
+        self.completed_task_var.set(
+            self.completed_task_items
+        )
+
     def __task_input_window(self, task_edit_window: bool=False, task_value: str="") -> str | None:
         """
         Creates a Toplevel tool window to prompt user to type new task into the provided entry widget, or edit selected task.
@@ -77,14 +93,14 @@ class ToDoManagerGUI(tk.Tk):
         else: 
             return None
 
-    def __add_task(self, completed: bool=False) -> None:
+    def __add_task(self, _completed: bool=False) -> None:
         """
         Adds tasks to either Ongoing tasks or completed tasks.
         Arguments:
             `completed`: bool -> specifies task should be added to Completed tasks ListBox if True
         """
 
-        if (not completed):
+        if (not _completed):
             new_task_input = self.__task_input_window() # Creates new tool window with entry for user to type in new task to add
 
             if (new_task_input):
@@ -106,8 +122,17 @@ class ToDoManagerGUI(tk.Tk):
             self.completed_task_var.set(
                 self.completed_task_items
             ) # Updates list of tasks
-            self.update() # Updates GUI window
             beep_tone() # Plays out tone.mp3 audio file
+            self.update() # Updates GUI window
+    def add_task(self, completed: bool=False):
+        """
+        Adds new task to list of ongoing tasks or list of completed task(if `completed` is `True`). 
+        Displays an error message if an error is encountered while trying to edit a task.
+        """
+        try:
+            self.__add_task(completed)
+        except (IndexError): 
+            self.index_error_response("mark as completed")
             
     def __delete_task(self) -> str:
         """
@@ -133,6 +158,15 @@ class ToDoManagerGUI(tk.Tk):
         )
 
         return removed_item
+    def delete_task(self):
+        """
+        Deletes task from list of ongoing tasks. 
+        Shows an error message if no task is selected and the `delete` button is clicked on the GUI
+        """
+        try:
+            self.__delete_task()
+        except(IndexError):
+            self.index_error_response("delete")
 
     def __edit_task(self) -> None:
         """
@@ -149,6 +183,15 @@ class ToDoManagerGUI(tk.Tk):
             self.ongoing_task_var.set(
                 self.ongoing_task_items
             )
+    def edit_task(self):
+        """
+        Edits selected task from the list of ongoing tasks
+        Shows an error message if the `edit` button is clicked without selecting task to be edited
+        """
+        try:
+            self.__edit_task()
+        except(IndexError):
+            self.index_error_response("to be edited")
 
     def __build_components(self) -> None:
         """
@@ -208,7 +251,7 @@ class ToDoManagerGUI(tk.Tk):
         #---------------------------------------------------------------------------------
         #                               BUTTONS
         #---------------------------------------------------------------------------------
-        button_frame = Frame(self, width=100, height=200)
+        button_frame = Frame(self, width=100, height=200, cursor="dot")
         button_frame.grid(
             column=4, row=1, sticky="nw", ipadx=1.5
         )
@@ -218,19 +261,26 @@ class ToDoManagerGUI(tk.Tk):
             column=0, row=0, **button_grid_options
         )
 
-        edit_button = Button(button_frame, text="edit task", command=lambda: self.__edit_task())
+        edit_button = Button(button_frame, text="edit task", command=lambda: self.edit_task())
         edit_button.grid(
             column=0, row=1, **button_grid_options
         )
 
-        remove_button = Button(button_frame, text="remove task", command=lambda: self.__delete_task())
+        remove_button = Button(button_frame, text="remove task", command=lambda: self.delete_task())
         remove_button.grid(
             column=0, row=2, **button_grid_options
         )
 
-        check_button = Button(button_frame, text="completed", command=lambda: self.__add_task(True))
+        check_button = Button(button_frame, text="completed", command=lambda: self.add_task(True))
         check_button.grid(
             column=0, row=3, **button_grid_options
+        )
+
+        clear_button = Button(
+            self, text="clear", command=self.__clear_completed_task
+        )
+        clear_button.grid(
+            column=4, row=3, sticky="nw", ipadx=15, ipady=15
         )
 
     def __bind_events(self) -> None:
